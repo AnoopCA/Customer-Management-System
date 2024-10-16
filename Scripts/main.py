@@ -17,8 +17,16 @@ def login_screen(choice):
         if btn:
             if choice == "Customer":
                 cursor.execute("SELECT * FROM customer")
-
-
+                for user in cursor:
+                    if user[0]==uid and user[2]==pwd:
+                        st.session_state['uid'] = user[0]
+                        st.session_state['uname'] = user[1]
+                        st.session_state['password'] = user[2]
+                        st.session_state['Role_ID'] = user[3]
+                        st.session_state['login'] = True
+                        st.session_state['auth'] = True
+                if st.session_state['login']:
+                    return True
             else:
                 cursor.execute("SELECT * FROM manager")
                 for user in cursor:
@@ -73,7 +81,17 @@ else:
     if not st.session_state['choice']:
         st.session_state['choice'] = None
 
+if st.session_state['choice'] == "Customer":
+    if login_screen(st.session_state['choice']):
+        with st.sidebar:
+            selected = option_menu("Customer", ["View Personal Information", "Update Personal Information", "View Purchases",
+                                   "Submit Support Request", "View Support Request Status", "Submit Feedback", "View Loyalty Points"],
+                                   menu_icon="cast")
 
+        if selected == "View Personal Information":
+            st.markdown("##### Personal Information: ")
+            personal_info = pd.read_sql(f"SELECT * FROM customer WHERE Customer_ID='{st.session_state['uid']}'", mydb)
+            st.dataframe(personal_info)
 
 
 st.session_state['popup'] = False
