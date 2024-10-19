@@ -58,14 +58,13 @@ if st.session_state['choice'] == "Customer":
             if emp_data:
                 st.session_state['emp_data'] = emp_data
             if 'emp_data' in st.session_state:
-                st.markdown("##### Update Employee Details")
                 Customer_Name = st.text_input("Name", value=st.session_state['emp_data'][1])
                 Password = st.text_input("Password", value=st.session_state['emp_data'][2])
                 Contact_No = st.text_input("Contact Number", value=st.session_state['emp_data'][3])
                 Email_ID = st.text_input("Email ID", value=st.session_state['emp_data'][4])
                 Address = st.text_input("Address", value=st.session_state['emp_data'][5])
-                Date_of_Birth = st.text_input("Date Of Birth", value=st.session_state['emp_data'][6])
-                Gender = st.text_input("Gender", value=st.session_state['emp_data'][7])
+                Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['emp_data'][6])
+                Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['emp_data'][7]=="Male" else 1)
 
                 if st.button("Save Changes"):
                     cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
@@ -87,12 +86,13 @@ if st.session_state['choice'] == "Customer":
             cursor.execute("SELECT Request_ID FROM Customer_Support_Requests ORDER BY Request_ID DESC LIMIT 1")
             Request_ID = int(cursor.fetchone()[0][1:])
             Request_ID = f'R{Request_ID+1:03}'
+            Purchase_ID = st.text_input("Enter the Purchase ID if any:")
+            Product_ID = st.text_input("Enter the Product ID if any:")
             Request_Date = datetime.date(datetime.today())
-            Request_Description = st.text_area("Enter the description of the issue")
-
+            Request_Description = st.text_area("Enter the description of the issue:")
             if st.button("Submit The Request"):
-                cursor.execute("INSERT INTO Customer_Support_Requests VALUES (%s,%s,%s,%s,%s,%s)",
-                               (Request_ID, st.session_state['uid'], Request_Date, Request_Description, "Pending", "NULL"))
+                cursor.execute("INSERT INTO Customer_Support_Requests VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                               (Request_ID, st.session_state['uid'], Purchase_ID, Product_ID, Request_Date, Request_Description, "Pending", "NULL"))
                 popup("Support Request Submitted Successfully!")
                 mydb.commit()
 
@@ -106,16 +106,26 @@ if st.session_state['choice'] == "Customer":
             cursor.execute("SELECT Feedback_ID FROM Customer_Feedback ORDER BY Feedback_ID DESC LIMIT 1")
             Feedback_ID = int(cursor.fetchone()[0][1:])
             Feedback_ID = f'F{Feedback_ID+1:03}'
-            Product_ID = st.text_input("Product ID")
+            cursor.execute("SELECT DISTINCT Product_Name FROM Products")
+            Products = cursor.fetchall()
+            Products = [i[0] for i in Products]
+            Products.insert(0, "General Feedback")
+            Products = st.selectbox("Enter a General Feedback or select a specific Product", Products)
             Feedback_Date = datetime.date(datetime.today())
-            Rating = st.selectbox("Rating", [1, 2, 3, 4, 5])
+            Rating = st.selectbox("Rating", [1, 2, 3, 4, 5], index=4)
             Comments = st.text_area("Comments")
             if st.button("Submit The Feedback"):
                 cursor.execute("INSERT INTO Customer_Feedback VALUES (%s,%s,%s,%s,%s,%s)",
-                               (Feedback_ID, st.session_state['uid'], Product_ID, Feedback_Date, Rating, Comments))
+                               (Feedback_ID, st.session_state['uid'], Products, Feedback_Date, Rating, Comments))
                 popup("Feedback Submitted Successfully!")
                 mydb.commit()
 
+        elif selected_feat == "View Loyalty Points":
+            st.markdown("#### View Loyalty Points")
+            cursor.execute("""SELECT * FROM Loyalty_Program WHERE Customer_ID=%s""", (st.session_state['uid'],))
+            loyalty_points = cursor.fetchall()
+            loyalty_points = pd.DataFrame(loyalty_points, columns=[desc[0] for desc in cursor.description])
+            st.dataframe(loyalty_points)
 
         # ---------------------------------------------------------------------------------------------- #
 
@@ -138,8 +148,8 @@ else:
         elif st.session_state['choice'] == "Product Manager":
             dept = "Production"
 
-        st.session_state['uid'] = st.text_input("Enter User ID")
-        pwd = st.text_input("Enter Password", type="password")
+        st.session_state['uid'] = st.text_input("Enter User ID", value='M001')
+        pwd = st.text_input("Enter Password", type="password", value='M001')
         if st.button("Login"):
             cursor.execute("SELECT Dept_Name FROM department WHERE Manager_ID=%s", (st.session_state['uid'],))
             user_dept = cursor.fetchall()
@@ -165,7 +175,33 @@ else:
                                     menu_icon="cast")
 
             # -------------- Enter code for the Customer Relationship Mamanger Features here --------------- #
-            st.write(f"Selected option is : {selected_feat}")
+            
+            if selected_feat == "View Customer Info":
+                st.markdown("#### View Customer Info")
+                cust_id = st.text_input("Enter the Customer ID to find the details:")
+                if st.button("Fetch Customer Details"):
+                    cust_data = pd.read_sql(f"SELECT * FROM customer WHERE Customer_ID='{cust_id}'", mydb)
+                    if cust_data.empty:
+                        st.warning("No details found for the given Customer ID. Please enter the correct Customer ID!")
+                    else:
+                        st.dataframe(cust_data)
+            
+            if selected_feat == "Add New Customer":
+                st.markdown("#### Add New Customer")
+                st.write("Enter the Customer Details below")
+                cursor.execute("SELECT Customer_ID FROM Customer ORDER BY Customer_ID DESC LIMIT 1")
+                Customer_ID = int(cursor.fetchone()[0][1:])
+                Customer_ID = f'C{Customer_ID+1:03}'
+                Customer_Name = st.text_input("Customer Name:")
+                Password = st.text_input("Password:")
+                Contact_No = st.text_input("Contact Number:")
+                Email_ID = st.text_input("Email ID:")
+                Address = st.text_input("Address:")
+                Date_of_Birth = st.date_input("Date Of Birth:")
+                Gender = st.selectbox("Gender:", ["Male", "Female"])
+                Registration_Date = datetime.date(datetime.today())
+                Manager_ID = st.text_input("")
+                        
 
             # ---------------------------------------------------------------------------------------------- #
 

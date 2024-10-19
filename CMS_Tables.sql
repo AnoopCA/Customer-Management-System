@@ -71,6 +71,8 @@ SELECT * FROM department;
 CREATE TABLE Customer_Support_Requests(
 		Request_ID VARCHAR(50),
 		Customer_ID VARCHAR(50),
+		Purchase_ID VARCHAR(50),
+		Product_ID VARCHAR(50),
 		Request_Date DATE,
 		Request_Description VARCHAR(255),
 		Request_Status VARCHAR(50),
@@ -78,16 +80,16 @@ CREATE TABLE Customer_Support_Requests(
         PRIMARY KEY(Request_ID)
 );
 
-INSERT INTO customer_support_requests VALUES ('R001', 'C001', '2024-01-15', 'Issue with login', 'Open', 'M001'),
-											 ('R002', 'C002', '2024-02-18', 'Billing discrepancy', 'Closed', 'M002'),
-											 ('R003', 'C003', '2024-03-22', 'Unable to reset password', 'Open', 'M003'),
-											 ('R004', 'C004', '2024-04-05', 'Shipping delay', 'In Progress', 'M004'),
-											 ('R005', 'C005', '2024-05-12', 'Request for refund', 'Closed', 'M005'),
-											 ('R006', 'C006', '2024-06-08', 'Product not received', 'In Progress', 'M006'),
-											 ('R007', 'C007', '2024-07-19', 'Technical issue with website', 'Open', 'M007'),
-											 ('R008', 'C008', '2024-08-02', 'Request for product exchange', 'Closed', 'M008'),
-											 ('R009', 'C009', '2024-09-14', 'Incorrect order received', 'In Progress', 'M009'),
-											 ('R010', 'C010', '2024-10-01', 'Question about warranty', 'Open', 'M010');
+INSERT INTO customer_support_requests VALUES ('R001', 'C001','P001',  'PRD001', '2024-01-15', 'Issue with login', 'Open', 'M001'),
+											 ('R002', 'C002','P0011',  'PRD002', '2024-02-18', 'Billing discrepancy', 'Closed', 'M002'),
+											 ('R003', 'C003','P0012',  'PRD003', '2024-03-22', 'Unable to reset password', 'Open', 'M003'),
+											 ('R004', 'C004','P002',  'PRD002', '2024-04-05', 'Shipping delay', 'In Progress', 'M004'),
+											 ('R005', 'C005','P003',  'PRD003', '2024-05-12', 'Request for refund', 'Closed', 'M005'),
+											 ('R006', 'C006','P004',  'PRD004', '2024-06-08', 'Product not received', 'In Progress', 'M006'),
+											 ('R007', 'C007','P005',  'PRD005', '2024-07-19', 'Technical issue with website', 'Open', 'M007'),
+											 ('R008', 'C008','P006',  'PRD006', '2024-08-02', 'Request for product exchange', 'Closed', 'M008'),
+											 ('R009', 'C009','P007',  'PRD007', '2024-09-14', 'Incorrect order received', 'In Progress', 'M009'),
+											 ('R010', 'C010','P008',  'PRD008', '2024-10-01', 'Question about warranty', 'Open', 'M010');
 SELECT * FROM customer_support_requests;
 
 CREATE TABLE Purchases(
