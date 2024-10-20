@@ -174,7 +174,7 @@ else:
                                             "View & Respond to Customer Feedback", "Manage Loyalty Program"],
                                     menu_icon="cast")
 
-            # -------------- Enter code for the Customer Relationship Mamanger Features here --------------- #
+            # -------------- Enter code for the Customer Relationship Mananger Features here --------------- #
             
             if selected_feat == "View Customer Info":
                 st.markdown("#### View Customer Info")
