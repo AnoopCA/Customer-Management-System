@@ -193,15 +193,98 @@ else:
                 Customer_ID = int(cursor.fetchone()[0][1:])
                 Customer_ID = f'C{Customer_ID+1:03}'
                 Customer_Name = st.text_input("Customer Name:")
-                Password = st.text_input("Password:")
+                Password = Customer_ID
                 Contact_No = st.text_input("Contact Number:")
                 Email_ID = st.text_input("Email ID:")
                 Address = st.text_input("Address:")
                 Date_of_Birth = st.date_input("Date Of Birth:")
                 Gender = st.selectbox("Gender:", ["Male", "Female"])
                 Registration_Date = datetime.date(datetime.today())
-                Manager_ID = st.text_input("")
-                        
+                Manager_ID = None
+                if st.button("Submit"):
+                    cursor.execute("INSERT INTO Customer VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", 
+                                (Customer_ID, Customer_Name, Password, Contact_No, Email_ID, Address, Date_of_Birth, Gender, Registration_Date, Manager_ID))
+                    mydb.commit()
+                    st.success(f"""Customer added successfully with the user ID -  "{Customer_ID}".
+                                   The password is the User ID itself. User can change the password by using the option "Update Personal Info".""")
+            
+            if selected_feat == "Delete Customer":
+                dlt_cust_id = st.text_input("Enter the Customer ID to delete:")
+                cursor.execute("SELECT Customer_Name FROM Customer WHERE Customer_ID=%s", (dlt_cust_id,))
+                dlt_cust_name = cursor.fetchone()
+                if st.button(f"Delete Customer Data"):
+                    if dlt_cust_name:
+                        cursor.execute("DELETE FROM Customer WHERE Customer_ID=%s", (dlt_cust_id,))
+                        mydb.commit()
+                        st.success("Customer data is deleted!")
+                    else:
+                        st.error("Customer details not found!")
+
+            if selected_feat == "Update Customer Details":
+                st.markdown("#### Update Customer Details")
+                updt_cust_id = st.text_input("Enter the Customer ID to update the details:")
+                if st.button("Fetch Customer Details"):
+                    cursor.execute("SELECT * FROM customer WHERE Customer_ID=%s",(updt_cust_id,))
+                    cust_data = cursor.fetchone()
+                    if cust_data:
+                        st.session_state['cust_data'] = cust_data
+                    else:
+                        if updt_cust_id != "":
+                            st.error("Customer ID is not found!")
+                            st.session_state['cust_data'] = None
+                    if 'cust_data' in st.session_state:
+                        if st.session_state['cust_data'] is not None:
+                            Customer_Name = st.text_input("Name", value=st.session_state['cust_data'][1])
+                            Password = st.text_input("Password", value=st.session_state['cust_data'][2])
+                            Contact_No = st.text_input("Contact Number", value=st.session_state['cust_data'][3])
+                            Email_ID = st.text_input("Email ID", value=st.session_state['cust_data'][4])
+                            Address = st.text_input("Address", value=st.session_state['cust_data'][5])
+                            Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['cust_data'][6])
+                            Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['cust_data'][7]=="Male" else 1)
+
+                            if st.button("Save Changes"):
+                                st.write("Save button clicked")
+                                #if 'cust_data' in st.session_state:
+                                #    if st.session_state['cust_data'] is not None:
+                                #        cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
+                                #                        WHERE Customer_ID=%s""", (Customer_Name,Password,Contact_No,Email_ID,Address,Date_of_Birth,Gender,updt_cust_id))
+                                #        mydb.commit()
+                                #        st.success("Personal details updated successfully!")
+                                #        st.session_state.pop('cust_data', None)
+
+            elif selected_feat == "Update Personal Info":
+                st.markdown("#### Update Personal Information")
+                cursor.execute("SELECT * FROM customer WHERE Customer_ID=%s",(st.session_state["uid"],))
+                emp_data = cursor.fetchone()
+                if emp_data:
+                    st.session_state['emp_data'] = emp_data
+                if 'emp_data' in st.session_state:
+                    Customer_Name = st.text_input("Name", value=st.session_state['emp_data'][1])
+                    Password = st.text_input("Password", value=st.session_state['emp_data'][2])
+                    Contact_No = st.text_input("Contact Number", value=st.session_state['emp_data'][3])
+                    Email_ID = st.text_input("Email ID", value=st.session_state['emp_data'][4])
+                    Address = st.text_input("Address", value=st.session_state['emp_data'][5])
+                    Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['emp_data'][6])
+                    Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['emp_data'][7]=="Male" else 1)
+
+                    if st.button("Save Changes"):
+                        cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
+                                        WHERE Customer_ID=%s""", (Customer_Name,Password,Contact_No,Email_ID,Address,Date_of_Birth,Gender,st.session_state["uid"]))
+                        mydb.commit()
+                        st.success("Personal details updated successfully!")
+                        st.session_state.pop('emp_data', None)
+
+
+
+
+
+
+
+
+
+
+
+
 
             # ---------------------------------------------------------------------------------------------- #
 
