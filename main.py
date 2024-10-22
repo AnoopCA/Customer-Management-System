@@ -186,7 +186,7 @@ else:
                     else:
                         st.dataframe(cust_data)
             
-            if selected_feat == "Add New Customer":
+            elif selected_feat == "Add New Customer":
                 st.markdown("#### Add New Customer")
                 st.write("Enter the Customer Details below")
                 cursor.execute("SELECT Customer_ID FROM Customer ORDER BY Customer_ID DESC LIMIT 1")
@@ -208,7 +208,7 @@ else:
                     st.success(f"""Customer added successfully with the user ID -  "{Customer_ID}".
                                    The password is the User ID itself. User can change the password by using the option "Update Personal Info".""")
             
-            if selected_feat == "Delete Customer":
+            elif selected_feat == "Delete Customer":
                 dlt_cust_id = st.text_input("Enter the Customer ID to delete:")
                 cursor.execute("SELECT Customer_Name FROM Customer WHERE Customer_ID=%s", (dlt_cust_id,))
                 dlt_cust_name = cursor.fetchone()
@@ -220,7 +220,7 @@ else:
                     else:
                         st.error("Customer details not found!")
 
-            if selected_feat == "Update Customer Details":
+            elif selected_feat == "Update Customer Details":
                 st.markdown("#### Update Customer Details")
                 updt_cust_id = st.text_input("Enter the Customer ID to update the details:")
                 if st.button("Fetch Customer Details"):
@@ -228,8 +228,7 @@ else:
                     cust_data = cursor.fetchone()
                     if cust_data:
                         st.session_state['cust_data'] = cust_data
-                    else:
-                        if updt_cust_id != "":
+                    elif updt_cust_id != "":
                             st.error("Customer ID is not found!")
                             st.session_state['cust_data'] = None
                     if 'cust_data' in st.session_state:
@@ -251,38 +250,9 @@ else:
                                 #        mydb.commit()
                                 #        st.success("Personal details updated successfully!")
                                 #        st.session_state.pop('cust_data', None)
-
-            elif selected_feat == "Update Personal Info":
-                st.markdown("#### Update Personal Information")
-                cursor.execute("SELECT * FROM customer WHERE Customer_ID=%s",(st.session_state["uid"],))
-                emp_data = cursor.fetchone()
-                if emp_data:
-                    st.session_state['emp_data'] = emp_data
-                if 'emp_data' in st.session_state:
-                    Customer_Name = st.text_input("Name", value=st.session_state['emp_data'][1])
-                    Password = st.text_input("Password", value=st.session_state['emp_data'][2])
-                    Contact_No = st.text_input("Contact Number", value=st.session_state['emp_data'][3])
-                    Email_ID = st.text_input("Email ID", value=st.session_state['emp_data'][4])
-                    Address = st.text_input("Address", value=st.session_state['emp_data'][5])
-                    Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['emp_data'][6])
-                    Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['emp_data'][7]=="Male" else 1)
-
-                    if st.button("Save Changes"):
-                        cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
-                                        WHERE Customer_ID=%s""", (Customer_Name,Password,Contact_No,Email_ID,Address,Date_of_Birth,Gender,st.session_state["uid"]))
-                        mydb.commit()
-                        st.success("Personal details updated successfully!")
-                        st.session_state.pop('emp_data', None)
-
-
-
-
-
-
-
-
-
-
+                else:
+                    st.write("not fetching data")
+                    
 
 
 
