@@ -148,8 +148,8 @@ else:
         elif st.session_state['choice'] == "Product Manager":
             dept = "Production"
 
-        st.session_state['uid'] = st.text_input("Enter User ID", value='M001')
-        pwd = st.text_input("Enter Password", type="password", value='M001')
+        st.session_state['uid'] = st.text_input("Enter User ID", value='M003')
+        pwd = st.text_input("Enter Password", type="password", value='M003')
         if st.button("Login"):
             cursor.execute("SELECT Dept_Name FROM department WHERE Manager_ID=%s", (st.session_state['uid'],))
             user_dept = cursor.fetchall()
@@ -231,30 +231,83 @@ else:
                     elif updt_cust_id != "":
                             st.error("Customer ID is not found!")
                             st.session_state['cust_data'] = None
-                    if 'cust_data' in st.session_state:
-                        if st.session_state['cust_data'] is not None:
-                            Customer_Name = st.text_input("Name", value=st.session_state['cust_data'][1])
-                            Password = st.text_input("Password", value=st.session_state['cust_data'][2])
-                            Contact_No = st.text_input("Contact Number", value=st.session_state['cust_data'][3])
-                            Email_ID = st.text_input("Email ID", value=st.session_state['cust_data'][4])
-                            Address = st.text_input("Address", value=st.session_state['cust_data'][5])
-                            Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['cust_data'][6])
-                            Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['cust_data'][7]=="Male" else 1)
+                if 'cust_data' in st.session_state:
+                    if st.session_state['cust_data'] is not None:
+                        Customer_Name = st.text_input("Name", value=st.session_state['cust_data'][1])
+                        Password = st.text_input("Password", value=st.session_state['cust_data'][2])
+                        Contact_No = st.text_input("Contact Number", value=st.session_state['cust_data'][3])
+                        Email_ID = st.text_input("Email ID", value=st.session_state['cust_data'][4])
+                        Address = st.text_input("Address", value=st.session_state['cust_data'][5])
+                        Date_of_Birth = st.date_input("Date Of Birth", value=st.session_state['cust_data'][6])
+                        Gender = st.selectbox("Gender", ["Male", "Female"], index = 0 if st.session_state['cust_data'][7]=="Male" else 1)
+                        if st.button("Save Changes"):
+                            if 'cust_data' in st.session_state:
+                                if st.session_state['cust_data'] is not None:
+                                    cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
+                                                    WHERE Customer_ID=%s""", (Customer_Name,Password,Contact_No,Email_ID,Address,Date_of_Birth,Gender,updt_cust_id))
+                                    mydb.commit()
+                                    st.success("Customer details updated successfully!")
+                                    st.session_state.pop('cust_data', None)
 
-                            if st.button("Save Changes"):
-                                st.write("Save button clicked")
-                                #if 'cust_data' in st.session_state:
-                                #    if st.session_state['cust_data'] is not None:
-                                #        cursor.execute("""UPDATE customer SET Customer_Name=%s,Password=%s,Contact_No=%s,Email_ID=%s,Address=%s,Date_of_Birth=%s,Gender=%s
-                                #                        WHERE Customer_ID=%s""", (Customer_Name,Password,Contact_No,Email_ID,Address,Date_of_Birth,Gender,updt_cust_id))
-                                #        mydb.commit()
-                                #        st.success("Personal details updated successfully!")
-                                #        st.session_state.pop('cust_data', None)
+            elif selected_feat == "View Customer Support Requests":
+                st.markdown("#### View Customer Support Requests")
+                suppt_cust_id = st.text_input("Enter the Customer ID:")
+                if st.button("Fetch the Details"):
+                    suppt_data = pd.read_sql(f"SELECT * FROM Customer_Support_Requests WHERE Customer_ID='{suppt_cust_id}'", mydb)
+                    if suppt_data.empty:
+                        st.error("Support Requests not found for the given Customer ID!")
+                    else:
+                        st.dataframe(suppt_data)
+
+            elif selected_feat == "Assign Support Requests":
+                st.markdown("#### Assign Support Requests")
+                st.markdown("##### All open Support Requests")
+                suppt_rqsts = pd.read_sql(f"SELECT * FROM Customer_Support_Requests WHERE Request_Status != 'Closed' AND Request_Status != 'Cancelled'", mydb)
+                if suppt_rqsts.empty:
+                    st.success("No pending Support Requests!")
                 else:
-                    st.write("not fetching data")
-                    
+                    st.dataframe(suppt_rqsts)
+                    suppt_rqst_id = st.selectbox("Select the Request ID:", suppt_rqsts['Request_ID'])
+                    cursor.execute("SELECT Manager_ID from Manager WHERE Department_ID='D002'")
+                    mngr_ids = cursor.fetchall()
+                    mngr_ids = [m[0] for m in mngr_ids]
+                    suppt_mngr_id = st.selectbox("Select the Manager ID:", mngr_ids)
+                    if st.button("Assign Manager"):
+                        cursor.execute("UPDATE Customer_Support_Requests SET Assigned_Manager_ID=%s WHERE Request_ID=%s", (suppt_mngr_id, suppt_rqst_id))
+                        mydb.commit()
+                        popup("Assigned the Support Manager Successfully!")
+                        st.rerun()
 
-
+            elif selected_feat == "View & Respond to Customer Feedback":
+                st.markdown("#### Customer Feedbacks")
+                feedbacks = pd.read_sql("SELECT * FROM Customer_Feedback ORDER BY Feedback_Date DESC", mydb)
+                if feedbacks.empty:
+                    st.warning("No Feedbacks to display!")
+                else:
+                    st.dataframe(feedbacks)
+                fdbk_id = st.text_input("Enter the Feedback ID to provide a response:")
+                fdbk_rspns = st.text_area("Enter the response here:")
+                if st.button("Submit Response"):
+                    cursor.execute("UPDATE Customer_Feedback SET CRM_Response=%s WHERE Feedback_ID=%s", (fdbk_rspns, fdbk_id))
+                    mydb.commit()
+                    popup("Feedback Response submitted successfully!")
+                    st.rerun()
+            
+            elif selected_feat == "Manage Loyalty Program":
+                st.markdown("Customer Loyalty Points Overview")
+                lylt_data = pd.read_sql("SELECT * FROM Loyalty_Program", mydb)
+                if lylt_data.empty:
+                    st.warning("No data to display!")
+                else:
+                    st.dataframe(lylt_data)
+                st.markdown("Provide Loyalty Points to Customers")
+                lylt_cust_id = st.text_input("Enter the Customer ID")
+                lylt_cust_pnts = st.number_input("Enter the Points to add")
+                if st.button("Submit"):
+                    cursor.execute("UPDATE Loyalty_Program SET Points_Earned=Points_Earned+%s WHERE Customer_ID=%s", (lylt_cust_pnts, lylt_cust_id))
+                    mydb.commit()
+                    popup("Points Addedd Successfully!")
+                    st.rerun()
 
             # ---------------------------------------------------------------------------------------------- #
 
@@ -268,12 +321,72 @@ else:
                         
         elif st.session_state['choice'] == "Support Manager":
             with st.sidebar:
-                selected_feat = option_menu("Support Manager", ["View All Support Requests", "Update Support Request", "Generate Support Reports", 
+                selected_feat = option_menu("Support Manager", ["View & Update Support Requests", "Generate Support Reports", 
                                                          "View Customer Purchases"],
                                     menu_icon="cast")
 
             # ---------------------- Enter code for the Support Manager Features here ---------------------- #
-            st.write(f"Selected option is : {selected_feat}")
+            
+            if selected_feat == "View & Update Support Requests":
+                st.markdown("#### All Open Support Requests")
+                suppt_data = pd.read_sql(f"""SELECT * FROM Customer_Support_Requests WHERE Assigned_Manager_ID='{st.session_state['uid']}' AND 
+                                             Request_Status != 'Closed' AND Request_Status != 'Cancelled'""", mydb)
+                if suppt_data.empty:
+                    st.warning("No Data to Display!")
+                else:
+                    st.dataframe(suppt_data)
+                    st.markdown("#### Update Support Requests")
+                    updt_suppt_rqst_id = st.text_input("Enter the Request ID:")
+                    updt_suppt_rqst_status = st.selectbox("Select the status", ["Open", "In Progress", "Pending", "Closed", "Cancelled"])
+                    if st.button("Submit"):
+                        cursor.execute("UPDATE Customer_Support_Requests SET Request_Status=%s WHERE Request_ID=%s", (updt_suppt_rqst_status, updt_suppt_rqst_id))
+                        mydb.commit()
+                        popup("Support Request status updated successfully!")
+                        st.rerun()
+
+            elif selected_feat == "Generate Support Reports":
+                st.markdown("#### Generate Support Reports")
+                st.markdown("#### Date-wise Report:")
+                suppt_rqst_rpt_sdate = st.date_input("Select the Start Date:")
+                suppt_rqst_rpt_edate = st.date_input("Select the End Date:")
+                suppt_rqst_rpt_date = pd.read_sql(f"SELECT * FROM Customer_Support_Requests WHERE Request_Date BETWEEN '{suppt_rqst_rpt_sdate}' AND '{suppt_rqst_rpt_edate}'", mydb)
+                if st.button("Generate Report - Date"):
+                    if suppt_rqst_rpt_date.empty:
+                        st.warning("No data available for the given date range!")
+                    else:
+                        st.dataframe(suppt_rqst_rpt_date)
+                st.markdown("#### Manager-wise Report:")
+                suppt_rqst_rpt_mngr_id = st.text_input("Enter the Manager ID:")
+                suppt_rqst_rpt_mngr = pd.read_sql(f"SELECT * FROM Customer_Support_Requests WHERE Assigned_Manager_ID='{suppt_rqst_rpt_mngr_id}'", mydb)
+                if st.button("Generate Report - Manager"):
+                    if suppt_rqst_rpt_mngr.empty:
+                        st.warning("No data available for the given Manager ID")
+                    else:
+                        st.dataframe(suppt_rqst_rpt_mngr)
+                st.markdown("#### Product-wise Report:")
+                suppt_rqst_rpt_prdt_id = st.text_input("Enter the Product ID:")
+                suppt_rqst_rpt_prdt = pd.read_sql(f"SELECT * FROM Customer_Support_Requests WHERE Product_ID='{suppt_rqst_rpt_prdt_id}'", mydb)
+                if st.button("Generate Report - Product"):
+                    if suppt_rqst_rpt_prdt.empty:
+                        st.warning("No data available for the given Product ID")
+                    else:
+                        st.dataframe(suppt_rqst_rpt_prdt)
+
+            elif selected_feat == "View Customer Purchases":
+                st.markdown("#### Customer Purchase Data")
+                cust_prchs_data = pd.read_sql("SELECT * FROM Purchases", mydb)
+                if cust_prchs_data.empty:
+                    st.warning("No Data found!")
+                else:
+                    st.dataframe(cust_prchs_data)
+                st.markdown("#### View Year-wise Data")
+                cust_prchs_yr = st.number_input("Enter the desired Year:", min_value=1980, max_value=datetime.date(datetime.today()).year, value=2024)
+                cust_prchs_data = pd.read_sql(f"SELECT * FROM Purchases WHERE YEAR(Purchase_Date)={cust_prchs_yr}", mydb)
+                if st.button("Get The Report"):
+                    if cust_prchs_data.empty:
+                        st.warning("No data found!")
+                    else:
+                        st.dataframe(cust_prchs_data)
 
             # ---------------------------------------------------------------------------------------------- #
 
@@ -291,7 +404,16 @@ else:
                                     menu_icon="cast")
 
             # ----------------------- Enter code for the Sales Manager Features here ----------------------- #
-            st.write(f"Selected option is : {selected_feat}")
+            if selected_feat == "Upload Sales Data":
+                st.markdown("#### Upload Sales Data")
+                sales_data = st.file_uploader("Please upload the Sales data file in CSV format:")
+                if st.button("Upload"):
+                    if sales_data is not None:
+                        sales_data = pd.read_csv(sales_data)
+                        st.dataframe(sales_data)
+
+
+
 
             # ---------------------------------------------------------------------------------------------- #
 

@@ -44,9 +44,9 @@ INSERT INTO manager VALUES ('M001', 'M001', 'John Smith', '9876543210', 'john.sm
 						   ('M005', 'M005', 'David Wilson', '5432109876', 'david.wilson@cms.com', 'D005'),
 						   ('M006', 'M006', 'Laura Brown', '4321098765', 'laura.brown@cms.com', 'D006'),
 						   ('M007', 'M007', 'James Anderson', '3210987654', 'james.anderson@cms.com', 'D007'),
-						   ('M008', 'M008', 'Sophia Martin', '2109876543', 'sophia.martin@cms.com', 'D008'),
-						   ('M009', 'M009', 'William Lee', '1098765432', 'william.lee@cms.com', 'D009'),
-						   ('M010', 'M010', 'Olivia Clark', '0987654321', 'olivia.clark@cms.com', 'D010');
+						   ('M008', 'M008', 'Sophia Martin', '2109876543', 'sophia.martin@cms.com', 'D002'),
+						   ('M009', 'M009', 'William Lee', '1098765432', 'william.lee@cms.com', 'D002'),
+						   ('M010', 'M010', 'Olivia Clark', '0987654321', 'olivia.clark@cms.com', 'D002');
 SELECT * FROM manager;
 
 CREATE TABLE Department(
@@ -80,10 +80,10 @@ CREATE TABLE Customer_Support_Requests(
         PRIMARY KEY(Request_ID)
 );
 
-INSERT INTO customer_support_requests VALUES ('R001', 'C001','P001',  'PRD001', '2024-01-15', 'Issue with login', 'Open', 'M001'),
+INSERT INTO customer_support_requests VALUES ('R001', 'C001','P001',  'PRD001', '2024-01-15', 'Issue with login', 'Open', 'M002'),
 											 ('R002', 'C002','P0011',  'PRD002', '2024-02-18', 'Billing discrepancy', 'Closed', 'M002'),
-											 ('R003', 'C003','P0012',  'PRD003', '2024-03-22', 'Unable to reset password', 'Open', 'M003'),
-											 ('R004', 'C004','P002',  'PRD002', '2024-04-05', 'Shipping delay', 'In Progress', 'M004'),
+											 ('R003', 'C003','P0012',  'PRD003', '2024-03-22', 'Unable to reset password', 'Open', 'M002'),
+											 ('R004', 'C004','P002',  'PRD002', '2024-04-05', 'Shipping delay', 'In Progress', 'M002'),
 											 ('R005', 'C005','P003',  'PRD003', '2024-05-12', 'Request for refund', 'Closed', 'M005'),
 											 ('R006', 'C006','P004',  'PRD004', '2024-06-08', 'Product not received', 'In Progress', 'M006'),
 											 ('R007', 'C007','P005',  'PRD005', '2024-07-19', 'Technical issue with website', 'Open', 'M007'),
@@ -142,20 +142,21 @@ CREATE TABLE Customer_Feedback(
 		Product_ID VARCHAR(50),
 		Feedback_Date DATE,
 		Rating INT,
-		Comments VARCHAR(255),
+        Feedback VARCHAR(255),
+        CRM_Response VARCHAR(255),
         PRIMARY KEY(Feedback_ID)
 );
 
-INSERT INTO customer_feedback VALUES ('F001', 'C001', 'PRD001', '2024-01-12', 4, 'Great mouse, very responsive.'),
-									 ('F002', 'C002', 'PRD002', '2024-01-18', 5, 'Excellent sound quality!'),
-									 ('F003', 'C003', 'PRD003', '2024-02-07', 3, 'Sturdy but a bit expensive.'),
-									 ('F004', 'C004', 'PRD004', '2024-02-14', 5, 'Keeps drinks cold for hours!'),
-									 ('F005', 'C005', 'PRD005', '2024-03-03', 4, 'Very fast, but battery life could be better.'),
-									 ('F006', 'C006', 'PRD006', '2024-03-12', 4, 'Good light for the price.'),
-									 ('F007', 'C007', 'PRD007', '2024-04-04', 3, 'Works well, but could be longer.'),
-									 ('F008', 'C008', 'PRD008', '2024-04-18', 5, 'Perfect size for travel.'),
-									 ('F009', 'C009', 'PRD009', '2024-05-09', 4, 'Comfortable and durable mat.'),
-									 ('F010', 'C010', 'PRD010', '2024-05-22', 5, 'Makes excellent coffee quickly.');
+INSERT INTO Customer_Feedback VALUES ('F001', 'C001', 'PRD001', '2024-01-12', 4, 'Great mouse, very responsive.', ''),
+									 ('F002', 'C002', 'PRD002', '2024-01-18', 5, 'Excellent sound quality!', ''),
+									 ('F003', 'C003', 'PRD003', '2024-02-07', 3, 'Sturdy but a bit expensive.', ''),
+									 ('F004', 'C004', 'PRD004', '2024-02-14', 5, 'Keeps drinks cold for hours!', ''),
+									 ('F005', 'C005', 'PRD005', '2024-03-03', 4, 'Very fast, but battery life could be better.', ''),
+									 ('F006', 'C006', 'PRD006', '2024-03-12', 4, 'Good light for the price.', ''),
+									 ('F007', 'C007', 'PRD007', '2024-04-04', 3, 'Works well, but could be longer.', ''),
+									 ('F008', 'C008', 'PRD008', '2024-04-18', 5, 'Perfect size for travel.', ''),
+									 ('F009', 'C009', 'PRD009', '2024-05-09', 4, 'Comfortable and durable mat.', ''),
+									 ('F010', 'C010', 'PRD010', '2024-05-22', 5, 'Makes excellent coffee quickly.', '');
 SELECT * FROM customer_feedback;
 
 CREATE TABLE Loyalty_Program(
