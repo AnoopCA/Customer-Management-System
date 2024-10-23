@@ -127,8 +127,6 @@ if st.session_state['choice'] == "Customer":
             loyalty_points = pd.DataFrame(loyalty_points, columns=[desc[0] for desc in cursor.description])
             st.dataframe(loyalty_points)
 
-        # ---------------------------------------------------------------------------------------------- #
-
         with st.sidebar:
                 st.markdown("<br>" * 5, unsafe_allow_html=True)
                 st.sidebar.markdown("---")
@@ -136,7 +134,9 @@ if st.session_state['choice'] == "Customer":
                 with col2:
                     if st.button("Logout"):
                         st.session_state['popup'] = True
-                        
+
+# ---------------------------------------------------------------------------------------------- #
+
 else:
     if not st.session_state['login']:
         if st.session_state['choice'] == "Customer Relationship Manager":
@@ -148,8 +148,8 @@ else:
         elif st.session_state['choice'] == "Product Manager":
             dept = "Production"
 
-        st.session_state['uid'] = st.text_input("Enter User ID", value='M003')
-        pwd = st.text_input("Enter Password", type="password", value='M003')
+        st.session_state['uid'] = st.text_input("Enter User ID", value='M004')
+        pwd = st.text_input("Enter Password", type="password", value='M004')
         if st.button("Login"):
             cursor.execute("SELECT Dept_Name FROM department WHERE Manager_ID=%s", (st.session_state['uid'],))
             user_dept = cursor.fetchall()
@@ -167,15 +167,16 @@ else:
                 st.error("Incorrect User ID!")
                 
     else:
+
+        # -------------- Enter code for the Customer Relationship Mananger Features here --------------- #
+        
         if st.session_state['choice'] == "Customer Relationship Manager":
             with st.sidebar:
                 selected_feat = option_menu("Customer Relationship Manager", ["View Customer Info", "Add New Customer", "Delete Customer", 
                                             "Update Customer Details", "View Customer Support Requests", "Assign Support Requests", 
                                             "View & Respond to Customer Feedback", "Manage Loyalty Program"],
                                     menu_icon="cast")
-
-            # -------------- Enter code for the Customer Relationship Mananger Features here --------------- #
-            
+    
             if selected_feat == "View Customer Info":
                 st.markdown("#### View Customer Info")
                 cust_id = st.text_input("Enter the Customer ID to find the details:")
@@ -309,8 +310,6 @@ else:
                     popup("Points Addedd Successfully!")
                     st.rerun()
 
-            # ---------------------------------------------------------------------------------------------- #
-
             with st.sidebar:
                 st.markdown("<br>" * 1, unsafe_allow_html=True)
                 st.sidebar.markdown("---")
@@ -318,15 +317,15 @@ else:
                 with col2:
                     if st.button("Logout"):
                         st.session_state['popup'] = True
-                        
+
+        # ---------------------- Enter code for the Support Manager Features here ---------------------- #
+            
         elif st.session_state['choice'] == "Support Manager":
             with st.sidebar:
                 selected_feat = option_menu("Support Manager", ["View & Update Support Requests", "Generate Support Reports", 
                                                          "View Customer Purchases"],
                                     menu_icon="cast")
 
-            # ---------------------- Enter code for the Support Manager Features here ---------------------- #
-            
             if selected_feat == "View & Update Support Requests":
                 st.markdown("#### All Open Support Requests")
                 suppt_data = pd.read_sql(f"""SELECT * FROM Customer_Support_Requests WHERE Assigned_Manager_ID='{st.session_state['uid']}' AND 
@@ -388,8 +387,6 @@ else:
                     else:
                         st.dataframe(cust_prchs_data)
 
-            # ---------------------------------------------------------------------------------------------- #
-
             with st.sidebar:
                 st.markdown("<br>" * 10, unsafe_allow_html=True)
                 st.sidebar.markdown("---")
@@ -397,25 +394,51 @@ else:
                 with col2:
                     if st.button("Logout"):
                         st.session_state['popup'] = True
-                        
+        
+        # ----------------------- Enter code for the Sales Manager Features here ----------------------- #
+                 
         elif st.session_state['choice'] == "Sales Manager":
             with st.sidebar:
                 selected_feat = option_menu("Sales Manager", ["Upload Sales Data", "Generate Sales Report", "View Product Feedback"],
                                     menu_icon="cast")
 
-            # ----------------------- Enter code for the Sales Manager Features here ----------------------- #
             if selected_feat == "Upload Sales Data":
                 st.markdown("#### Upload Sales Data")
                 sales_data = st.file_uploader("Please upload the Sales data file in CSV format:")
+                if sales_data is not None:
+                    sales_data = pd.read_csv(sales_data)
+                    st.dataframe(sales_data)
+            
                 if st.button("Upload"):
-                    if sales_data is not None:
-                        sales_data = pd.read_csv(sales_data)
-                        st.dataframe(sales_data)
+                    for index, row in sales_data.iterrows():
+                        cursor.execute("INSERT INTO Purchases VALUES (%s,%s,%s,%s,%s,%s)", tuple(row))
+                        mydb.commit()
+                    st.success("Data uploaded successfully!")
 
+            if selected_feat == "Generate Sales Report":
+                st.markdown("#### Generate Sales Report")
+                cust_prchs_data = pd.read_sql("SELECT * FROM Purchases", mydb)
+                if cust_prchs_data.empty:
+                    st.warning("No Data found!")
+                else:
+                    st.dataframe(cust_prchs_data)
+                st.markdown("#### View Year-wise Data")
+                cust_prchs_yr = st.number_input("Enter the desired Year:", min_value=1980, max_value=datetime.date(datetime.today()).year, value=2024)
+                cust_prchs_data = pd.read_sql(f"SELECT * FROM Purchases WHERE YEAR(Purchase_Date)={cust_prchs_yr}", mydb)
+                if st.button("Get The Report"):
+                    if cust_prchs_data.empty:
+                        st.warning("No data found!")
+                    else:
+                        st.dataframe(cust_prchs_data)
 
-
-
-            # ---------------------------------------------------------------------------------------------- #
+            if selected_feat == "View Product Feedback":
+                st.markdown("#### View Product Feedbacks")
+                prdt_fdbk = pd.read_sql("""SELECT PD.Product_ID, PD.Product_Name, PD.Price, PD.Category, CF.Feedback_Date, CF.Rating, CF.Feedback 
+                                        FROM Customer_Feedback CF JOIN Products PD ON CF.Product_ID=PD.Product_ID WHERE CF.Product_ID IS NOT NULL""", mydb)
+                if prdt_fdbk.empty:
+                    st.warning("No Data Found!")
+                else:
+                    st.dataframe(prdt_fdbk)
 
             with st.sidebar:
                     st.markdown("<br>" * 12, unsafe_allow_html=True)
@@ -425,16 +448,98 @@ else:
                         if st.button("Logout"):
                             st.session_state['popup'] = True
                             
+        # ---------------------- Enter code for the Product Manager Features here ---------------------- #
+
         elif st.session_state['choice'] == "Product Manager":
             with st.sidebar:
-                selected_feat = option_menu("Product Manager", ["Add New Products", "Update Products", "Delete Products", 
-                                                         "Manage Product Categories", "View Product Feedback", "Update Product Pricing"],
+                selected_feat = option_menu("Product Manager", ["View All Products", "Add New Products", "Update Products", "Delete Products", 
+                                                         "Update Product Categories", "View Product Feedback"],
                                     menu_icon="cast")
-
-            # ---------------------- Enter code for the Product Manager Features here ---------------------- #
-            st.write(f"Selected option is : {selected_feat}")
             
-            # ---------------------------------------------------------------------------------------------- #
+            if selected_feat == "View All Products":
+                st.markdown("#### View All Products")
+                prdt_dtls = pd.read_sql("SELECT * FROM Products", mydb)
+                if prdt_dtls.empty:
+                    st.warning("No data to display!")
+                else:
+                    st.dataframe(prdt_dtls)
+
+            elif selected_feat == "Add New Products":
+                st.markdown("#### Add New Products")
+                cursor.execute("SELECT Product_ID FROM Products ORDER BY Product_ID DESC LIMIT 1")
+                Product_ID = int(cursor.fetchone()[0][3:])
+                Product_ID = f'PRD{Product_ID+1:03}'
+                Product_Name = st.text_input("Enter Product Name:")
+                Price = st.number_input("Enter the Price:")
+                Category = st.text_input("Enter the Category:")
+                if st.button("Add Product"):
+                    cursor.execute("INSERT INTO Products VALUES (%s,%s,%s,%s)", (Product_ID,Product_Name,Price, Category))
+                    mydb.commit()
+                    st.success("Product added successfully!")
+            
+            elif selected_feat == "Update Products":
+                st.markdown("#### Update Products")
+                Product_ID = st.text_input("Enter the Product ID:")
+                if st.button("Fetch Details"):
+                    cursor.execute("SELECT * FROM Products WHERE Product_ID=%s", (Product_ID,))
+                    prdt_dtls = cursor.fetchone()
+                    if prdt_dtls:
+                        st.session_state['prdt_id'] = prdt_dtls[0]
+                        st.session_state['prdt_name'] = prdt_dtls[1]
+                        st.session_state['prdt_price'] = prdt_dtls[2]
+                        st.session_state['prdt_category'] = prdt_dtls[3]
+                    else:
+                        st.error("No details found for the given Product ID!")
+                if 'prdt_id' in st.session_state:
+                        st.session_state['prdt_name'] = st.text_input("Product Name:", value=st.session_state['prdt_name'])
+                        st.session_state['prdt_price'] = st.number_input("Price:", value=st.session_state['prdt_price'])
+                        st.session_state['prdt_category'] = st.text_input("Category:", value=st.session_state['prdt_category'])
+                if st.button("Update Product Details"):
+                    if 'prdt_id' not in st.session_state:
+                        st.error("No details to update!")
+                    else:
+                        cursor.execute("UPDATE Products SET Product_Name=%s, Price=%s, Category=%s WHERE Product_ID=%s", 
+                                    (st.session_state['prdt_name'],st.session_state['prdt_price'],st.session_state['prdt_category'], st.session_state['prdt_id']))
+                        mydb.commit()
+                        popup("Product details updated successfully!")
+                        st.session_state.pop('prdt_id', None)
+                        st.rerun()
+            
+            elif selected_feat == "Delete Products":
+                st.markdown("#### Delete Products")
+                dlt_prdt_id = st.text_input("Enter the Product ID")
+                if st.button("Delete Product"):
+                    cursor.execute("DELETE FROM Products WHERE Product_ID=%s", (dlt_prdt_id,))
+                    mydb.commit()
+                    if cursor.rowcount > 0:
+                        st.success("Product Deleted Successfully!")
+                    else:
+                        st.error("Incorrect Product ID!")
+            
+            elif selected_feat == "Update Product Categories":
+                st.markdown("##### Update Product Category")
+                cursor.execute("SELECT DISTINCT Category FROM Products")
+                updt_ctgrs = cursor.fetchall()
+                updt_ctgrs = [ct[0] for ct in updt_ctgrs]
+                updt_ctgry = st.selectbox("Select the Category to update:", updt_ctgrs)
+                updt_ctgry_nw = st.text_input("Enter the New Category name:")
+                if st.button("Update Category"):
+                    if updt_ctgry_nw:
+                        cursor.execute("UPDATE Products SET Category=%s WHERE Category=%s", (updt_ctgry_nw, updt_ctgry))
+                        mydb.commit()
+                        if cursor.rowcount > 0:
+                            popup("Category Name updated successfully!")
+                            st.rerun()
+                    else:
+                        st.warning("Provide a valid Category Name!")
+
+            elif selected_feat == "View Product Feedback":
+                st.markdown("#### View Product Feedback")
+                feedbacks = pd.read_sql("SELECT * FROM Customer_Feedback ORDER BY Feedback_Date DESC", mydb)
+                if feedbacks.empty:
+                    st.warning("No Feedbacks to display!")
+                else:
+                    st.dataframe(feedbacks)
 
             with st.sidebar:
                     st.markdown("<br>" * 7, unsafe_allow_html=True)
@@ -444,6 +549,7 @@ else:
                         if st.button("Logout"):
                             st.session_state['popup'] = True
                             
+        # ---------------------------------------------------------------------------------------------- #
 
 if st.session_state['popup']:
     st.session_state['login'] = False
