@@ -43,7 +43,7 @@ if st.session_state['choice'] == "Customer":
                                    "Submit Support Request", "View Support Request Status", "Submit Feedback", "View Loyalty Points"],
                                    menu_icon="cast")
         
-        # -------------------------- Enter code for the Customer Features here ------------------------- #
+        # ---------------------------------- Customer Management -------------------------------------------- #
         
         if selected_feat == "View Personal Info":
             st.markdown("#### View Personal Information")
@@ -168,7 +168,7 @@ else:
                 
     else:
 
-        # -------------- Enter code for the Customer Relationship Mananger Features here --------------- #
+        # ---------------------------------- Customer Relationship Manager ---------------------------------- #
         
         if st.session_state['choice'] == "Customer Relationship Manager":
             with st.sidebar:
@@ -318,7 +318,7 @@ else:
                     if st.button("Logout"):
                         st.session_state['popup'] = True
 
-        # ---------------------- Enter code for the Support Manager Features here ---------------------- #
+        # ---------------------------------- Customer Support Manager --------------------------------------- #
             
         elif st.session_state['choice'] == "Support Manager":
             with st.sidebar:
@@ -395,7 +395,7 @@ else:
                     if st.button("Logout"):
                         st.session_state['popup'] = True
         
-        # ----------------------- Enter code for the Sales Manager Features here ----------------------- #
+        # ---------------------------------- Sales Manager -------------------------------------------------- #
                  
         elif st.session_state['choice'] == "Sales Manager":
             with st.sidebar:
@@ -448,7 +448,7 @@ else:
                         if st.button("Logout"):
                             st.session_state['popup'] = True
                             
-        # ---------------------- Enter code for the Product Manager Features here ---------------------- #
+        # ---------------------------------- Product Manager ------------------------------------------------ #
 
         elif st.session_state['choice'] == "Product Manager":
             with st.sidebar:
