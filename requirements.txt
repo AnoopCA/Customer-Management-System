@@ -1,0 +1,4 @@
+mysql-connector-python==9.0.0
+pandas==2.2.2
+streamlit==1.37.0
+streamlit-option-menu==0.3.13
