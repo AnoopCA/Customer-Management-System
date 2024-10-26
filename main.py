@@ -152,8 +152,8 @@ elif st.session_state['choice'] == "Customer":
             Comments = st.text_area("Comments")
             # When "Submit The Feedback" button is clicked insert the new feedback into the database
             if st.button("Submit The Feedback"):
-                cursor.execute("INSERT INTO Customer_Feedback VALUES (%s,%s,%s,%s,%s,%s)",
-                               (Feedback_ID, st.session_state['uid'], Products, Feedback_Date, Rating, Comments))
+                cursor.execute("INSERT INTO Customer_Feedback VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                               (Feedback_ID, st.session_state['uid'], Products, Feedback_Date, Rating, Comments, None))
                 popup("Feedback Submitted Successfully!")
                 cms_db.commit()
 
