@@ -233,6 +233,7 @@ else:
                     if cust_data.empty:
                         st.warning("No details found for the given Customer ID. Please enter the correct Customer ID!")
                     else:
+                        # Display the customer data
                         st.dataframe(cust_data)
             
             # Feature to add a new customer by entering relevant details
