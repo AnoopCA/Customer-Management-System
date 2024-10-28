@@ -349,7 +349,7 @@ else:
             elif selected_feat == "View & Respond to Customer Feedback":
                 st.markdown("#### Customer Feedbacks")
                 feedbacks = pd.read_sql("SELECT * FROM Customer_Feedback ORDER BY Feedback_Date DESC", cms_db)
-                # Check if there are no feedbacks to display, otherwise display the feedbacks
+                # Check if there are no feedbacks to display, otherwise display the feedbacks.
                 if feedbacks.empty:
                     st.warning("No Feedbacks to display!")
                 else:
@@ -382,7 +382,7 @@ else:
                     popup("Points Addedd Successfully!")
                     st.rerun()
 
-            # Sidebar section for logout button and separation
+            # Sidebar section for logout button and some separation
             with st.sidebar:
                 st.markdown("<br>" * 1, unsafe_allow_html=True)
                 st.sidebar.markdown("---")
